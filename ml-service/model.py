@@ -1,41 +1,55 @@
 import torch
 import torch.nn as nn
 
-class LSTMAutoencoder(nn.Module):
-    def __init__(self, input_size=2, hidden_size=32, num_layers=1):
-        super(LSTMAutoencoder, self).__init__()
 
-        # Encoder — compresses sequence into hidden state
+class LSTMForecaster(nn.Module):
+    """
+    Many-to-many LSTM forecaster.
+    Input:  (batch, seq_len=20, features=2)   — 20 historical readings of [cpuPercent, memoryPercent]
+    Output: (batch, horizon=10, features=2)    — 10 predicted future readings
+    """
+
+    def __init__(self, input_size=2, hidden_size=64, num_layers=1, forecast_horizon=10):
+        super(LSTMForecaster, self).__init__()
+        self.forecast_horizon = forecast_horizon
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+
+        # Encoder LSTM — processes the input sequence
         self.encoder = nn.LSTM(
             input_size=input_size,
             hidden_size=hidden_size,
             num_layers=num_layers,
-            batch_first=True
+            batch_first=True,
         )
 
-        # Decoder — reconstructs sequence from hidden state
+        # Decoder LSTM — autoregressively generates the forecast
         self.decoder = nn.LSTM(
-            input_size=hidden_size,
+            input_size=input_size,
             hidden_size=hidden_size,
             num_layers=num_layers,
-            batch_first=True
+            batch_first=True,
         )
 
-        # Maps hidden state back to original feature size
-        self.output_layer = nn.Linear(hidden_size, input_size)
+        # Projects hidden state back to feature space
+        self.fc = nn.Linear(hidden_size, input_size)
 
     def forward(self, x):
-        # x shape: (batch, sequence_length, input_size)
+        # x shape: (batch, seq_len=20, input_size=2)
 
-        # Encode — we only keep the final hidden state
-        _, (hidden, _) = self.encoder(x)
+        # Encode — run input through encoder, keep final hidden/cell state
+        _, (hidden, cell) = self.encoder(x)
 
-        # Repeat hidden state across all timesteps for decoder input
-        decoder_input = hidden[-1].unsqueeze(1).repeat(1, x.shape[1], 1)
+        # Seed the decoder with the last timestep of the input
+        decoder_input = x[:, -1:, :]  # (batch, 1, input_size)
 
-        # Decode — reconstruct the full sequence
-        decoder_out, _ = self.decoder(decoder_input)
+        outputs = []
+        for _ in range(self.forecast_horizon):
+            decoder_out, (hidden, cell) = self.decoder(decoder_input, (hidden, cell))
+            step_pred = self.fc(decoder_out)  # (batch, 1, input_size)
+            outputs.append(step_pred)
+            decoder_input = step_pred  # feed prediction as next input
 
-        # Project back to input feature space
-        reconstruction = self.output_layer(decoder_out)
-        return reconstruction
+        # Stack along time axis → (batch, forecast_horizon, input_size)
+        forecast = torch.cat(outputs, dim=1)
+        return forecast

@@ -34,4 +34,15 @@ router.get('/:id/metrics', async (req, res) => {
   }
 });
 
+// GET /api/containers/:id/recommend — proxy to ML service for cost recommendation
+router.get('/:id/recommend', async (req, res) => {
+  try {
+    const mlResponse = await fetch(`http://localhost:8000/recommend/${req.params.id}`);
+    const data = await mlResponse.json();
+    res.json(data);
+  } catch (err) {
+    res.status(503).json({ error: 'ML service unavailable' });
+  }
+});
+
 module.exports = router;

@@ -7,6 +7,8 @@ const containerMetricSchema = new mongoose.Schema({
   cpuPercent:     { type: Number, required: true },
   memoryPercent:  { type: Number, required: true },
   restartCount:   { type: Number, default: 0 },
+  cpuLimit:       { type: Number, default: 0 },
+  memoryLimit:    { type: Number, default: 0 },
   timestamp:      { type: Date, default: Date.now },
 });
 

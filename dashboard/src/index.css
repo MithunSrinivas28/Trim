@@ -125,3 +125,10 @@ body {
   padding: 2px 8px;
   border-radius: 4px;
 }
+
+.detail-section {
+  margin: 0 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}

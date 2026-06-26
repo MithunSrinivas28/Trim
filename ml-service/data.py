@@ -3,10 +3,11 @@ from sklearn.preprocessing import MinMaxScaler
 from pymongo import MongoClient
 
 client = MongoClient("mongodb://localhost:27017")
-db = client["pulse"]
+db = client["trim"]
 collection = db["containermetrics"]
 
-SEQUENCE_LENGTH = 20  # each training sample = 20 consecutive readings
+SEQUENCE_LENGTH = 20   # input window — 20 consecutive readings
+FORECAST_HORIZON = 10  # prediction target — next 10 readings
 
 def fetch_metrics(container_id: str, limit: int = 200):
     docs = list(
@@ -18,7 +19,8 @@ def fetch_metrics(container_id: str, limit: int = 200):
     return docs
 
 def build_sequences(docs):
-    if len(docs) < SEQUENCE_LENGTH:
+    total_needed = SEQUENCE_LENGTH + FORECAST_HORIZON
+    if len(docs) < total_needed:
         return None, None, None
 
     # Raw 2D array — shape (N, 2): [[cpu, mem], [cpu, mem], ...]
@@ -28,11 +30,12 @@ def build_sequences(docs):
     scaler = MinMaxScaler()
     scaled = scaler.fit_transform(raw)
 
-    # Sliding window — each sample is SEQUENCE_LENGTH consecutive timesteps
-    sequences = []
-    for i in range(len(scaled) - SEQUENCE_LENGTH):
-        sequences.append(scaled[i : i + SEQUENCE_LENGTH])
+    # Supervised sliding window — X is input, Y is forecast target
+    X, Y = [], []
+    for i in range(len(scaled) - total_needed + 1):
+        X.append(scaled[i : i + SEQUENCE_LENGTH])
+        Y.append(scaled[i + SEQUENCE_LENGTH : i + total_needed])
 
-    # Shape: (num_sequences, SEQUENCE_LENGTH, 2)
-    X = np.array(sequences, dtype=np.float32)
-    return X, scaler, scaled
+    X = np.array(X, dtype=np.float32)
+    Y = np.array(Y, dtype=np.float32)
+    return X, Y, scaler
