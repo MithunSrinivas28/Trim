@@ -1,5 +1,6 @@
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { useState, useEffect } from "react";
+
 const MetricsChart = ({ containerId, containerName }) => {
   const [metrics, setMetrics] = useState([]);
 
@@ -17,7 +18,7 @@ const MetricsChart = ({ containerId, containerName }) => {
   }, [containerId]);
 
   if (!containerId) return (
-    <div style={{ padding: "24px", color: "#9ca3af", fontSize: "14px" }}>
+    <div style={{ padding: "24px", color: "var(--text-muted)", fontSize: "14px" }}>
       Click a container card to see its metrics
     </div>
   );
@@ -29,42 +30,35 @@ const MetricsChart = ({ containerId, containerName }) => {
   }));
 
   return (
-    <div style={{
-      margin: "0 24px 24px",
-      background: "#1a1a1a",
-      border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: "10px",
-      padding: "24px"
-    }}>
-      <div style={{ marginBottom: "20px" }}>
-        <span style={{ fontWeight: 600, fontSize: "15px" }}>{containerName}</span>
-        <span style={{ color: "#9ca3af", fontSize: "13px", marginLeft: "10px" }}>Last 50 readings</span>
+    <div style={{ margin: "0 24px 24px" }}>
+      <div style={{ marginBottom: "16px", fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text-secondary)" }}>
+        {containerName} / last 50 readings
       </div>
 
       <ResponsiveContainer width="100%" height={250}>
         <LineChart data={data}>
-          <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} />
+          <CartesianGrid stroke="var(--border)" strokeOpacity={0.5} vertical={false} />
           <XAxis
             dataKey="time"
-            tick={{ fill: "#9ca3af", fontSize: 11 }}
+            tick={{ fill: "var(--text-muted)", fontSize: 11, fontFamily: "var(--font-mono)" }}
             tickLine={false}
             axisLine={false}
             interval="preserveStartEnd"
           />
           <YAxis
-            tick={{ fill: "#9ca3af", fontSize: 11 }}
+            tick={{ fill: "var(--text-muted)", fontSize: 11, fontFamily: "var(--font-mono)" }}
             tickLine={false}
             axisLine={false}
             domain={[0, 100]}
             width={30}
           />
           <Tooltip
-            contentStyle={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "6px" }}
-            labelStyle={{ color: "#9ca3af", fontSize: "12px" }}
-            itemStyle={{ color: "#fff", fontSize: "12px" }}
+            contentStyle={{ background: "var(--bg-card)", border: "1px solid var(--border-accent)", borderRadius: "var(--radius-sm)" }}
+            labelStyle={{ color: "var(--text-secondary)", fontSize: "12px", fontFamily: "var(--font-sans)" }}
+            itemStyle={{ color: "var(--text-primary)", fontSize: "12px", fontFamily: "var(--font-sans)" }}
           />
-          <Line type="monotone" dataKey="cpu" stroke="#ffffff" strokeWidth={1.5} dot={false} name="CPU %" />
-          <Line type="monotone" dataKey="memory" stroke="#6b7280" strokeWidth={1.5} dot={false} name="Memory %" />
+          <Line type="monotone" dataKey="cpu" stroke="var(--accent-blue)" strokeWidth={2} dot={false} name="CPU %" />
+          <Line type="monotone" dataKey="memory" stroke="var(--accent-indigo)" strokeWidth={2} dot={false} name="Memory %" />
         </LineChart>
       </ResponsiveContainer>
     </div>

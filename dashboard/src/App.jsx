@@ -17,9 +17,14 @@ function App() {
   const { recommendation, loading: agentLoading } = useAgent(selected);
 
   return (
-    <div>
+    <div style={{ background: "var(--bg-base)", minHeight: "100vh" }}>
       <Navbar />
-      <div className="cards-grid">
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+        gap: "12px",
+        padding: "20px 24px"
+      }}>
         {containers.map((c) => (
           <ContainerCard
             key={c.containerId}

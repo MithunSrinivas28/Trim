@@ -1,6 +1,9 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pymongo import MongoClient
+import threading
+import time
 import torch
 import torch.nn as nn
 import numpy as np
@@ -50,6 +53,18 @@ def train_model(container_id: str, epochs: int = 50):
     models[container_id] = {"model": model, "scaler": scaler}
     print(f"[startup] Trained model for {container_id} — loss: {loss.item():.6f}")
 
+def background_retrain():
+    while True:
+        time.sleep(600)
+        print("[retrain] Running scheduled retrain for all containers...")
+        known_ids = collection.distinct("containerId")
+        for cid in known_ids:
+            try:
+                train_model(cid)
+                print(f"[retrain] {cid} — done")
+            except Exception as e:
+                print(f"[retrain] {cid} — failed: {e}")
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Auto-train for all containers found in MongoDB on startup
@@ -58,9 +73,22 @@ async def lifespan(app: FastAPI):
     for cid in container_ids:
         train_model(cid)
     print(f"[startup] Done — trained {len(container_ids)} models")
+    
+    t = threading.Thread(target=background_retrain, daemon=True)
+    t.start()
+    print("[startup] Background retrain thread started — runs every 10 minutes")
+    
     yield  # app runs here
 
 app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # ── Health ─────────────────────────────────────────────────────────────
 @app.get("/health")
