@@ -16,28 +16,8 @@ Then a LangChain ReAct agent with two tools — `query_anomalies()` and `suggest
 
 ## Architecture
 
-```
-Docker Engine
-     │
-     ▼
-Node.js Backend (Dockerode + Express)
-     │  polls every 10 seconds
-     ▼
-MongoDB (trim.containermetrics)
-     │
-     ├──► REST API (/api/containers, /api/containers/:id/recommend)
-     │              │
-     │              ▼
-     │         React Dashboard
-     │         (live cards + forecast chart + cost card + agent panel)
-     │
-     └──► Python ML Service (FastAPI + PyTorch LSTM + LangChain)
-               │
-               ├── /train/:id       → trains LSTMForecaster on container history
-               ├── /forecast/:id    → 10-step prediction + p95 CPU/memory
-               ├── /recommend/:id   → cheapest EC2 instance + monthly cost + waste %
-               └── /agent/:id       → ReAct agent: query anomalies → suggest remediation
-```
+<img width="1774" height="887" alt="ChatGPT Image Jun 29, 2026, 03_25_25 AM" src="https://github.com/user-attachments/assets/f8b1b0ab-13e4-48f2-abcd-79d201731f1e" />
+
 
 ---
 
