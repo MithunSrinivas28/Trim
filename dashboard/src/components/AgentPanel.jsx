@@ -32,7 +32,7 @@ const AgentPanel = ({ recommendation, loading }) => {
       </div>
 
       <div style={{ fontSize: "12px", color: "#6b7280", marginBottom: "16px" }}>
-        Powered by LLaMA 3 via Groq
+        Powered by Gemini 1.5 Flash
       </div>
 
       <div

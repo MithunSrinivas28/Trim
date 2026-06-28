@@ -91,6 +91,8 @@ Two tools power the agent:
 
 The agent decides the order of tool calls and whether both tools are needed. Max 4 iterations prevent runaway loops. The result is a single, actionable recommendation grounded in real data — not a generic "consider optimizing your resources" response.
 
+> **Note on implementation:** The final implementation uses a direct two-step pipeline rather than a ReAct loop — `query_anomalies()` queries MongoDB, then `suggest_remediation()` calls the LLM directly. This was due to free-tier Groq models lacking reliable tool-calling support. The architecture retains the two-tool design and LLM-powered remediation. In production, this would use a paid model (GPT-4o or Claude) with full ReAct loop support.
+
 ---
 
 ## The Dashboard
