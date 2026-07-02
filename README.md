@@ -98,7 +98,7 @@ Trim is built to handle heavy data ingestion and ML workloads without blocking t
 | **PyTorch ML** | 10-Step Inference | Forward pass sliding window | **728 ms** |
 | **Groq Agent** | End-to-End Orchestration | DB query + LLaMA 3.1 analysis + JSON response | **1.92 s** |
 
-*Note: Training is intentionally heavy. Because it takes ~33 seconds per container, Trim runs all model training asynchronously in a dedicated background thread every 10 minutes, ensuring the API and dashboard remain perfectly responsive.*
+### *Note: Training is intentionally heavy. Because it takes ~33 seconds per container, Trim runs all model training asynchronously in a dedicated background thread every 10 minutes, ensuring the API and dashboard remain perfectly responsive.*
 ---
 
 ## Project Structure
